@@ -1,0 +1,122 @@
+{% extends "base.html" %} {% block title %}Dashboard | Job Recommendation AI{%
+endblock %} {% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title">Upload / Update CV</h4>
+        <form id="cv-form" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="cv_file" class="form-label">CV (PDF)</label>
+            <input
+              type="file"
+              class="form-control"
+              id="cv_file"
+              name="cv_file"
+              accept="application/pdf"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-success">Upload CV</button>
+        </form>
+        <div id="cv-message" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title">Your Skills</h4>
+        <ul id="skills-list" class="list-group mb-2"></ul>
+        <p id="skills-empty" class="text-muted">
+          Skills extracted from your CV will appear here.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function requireAuth() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      window.location.href = "/login/";
+    }
+    return token;
+  }
+
+  async function loadSkills() {
+    const token = requireAuth();
+    try {
+      const res = await fetch("/api/skills/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = document.getElementById("skills-list");
+      const empty = document.getElementById("skills-empty");
+      list.innerHTML = "";
+      if (data.skills && data.skills.length) {
+        empty.style.display = "none";
+        data.skills.forEach((s) => {
+          const li = document.createElement("li");
+          li.className = "list-group-item";
+          li.textContent = s.skill_name;
+          list.appendChild(li);
+        });
+      } else {
+        empty.style.display = "block";
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  document.getElementById("cv-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const token = requireAuth();
+    const fileInput = document.getElementById("cv_file");
+    const msg = document.getElementById("cv-message");
+    msg.textContent = "";
+
+    if (!fileInput.files.length) return;
+
+    const formData = new FormData();
+    formData.append("cv_file", fileInput.files[0]);
+
+    try {
+      const uploadRes = await fetch("/api/cv/", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) {
+        msg.textContent = uploadData.error || "Upload failed";
+        msg.className = "mt-3 text-danger";
+        return;
+      }
+      msg.textContent = "CV uploaded. Extracting skills...";
+      msg.className = "mt-3 text-info";
+
+      const extractRes = await fetch("/skills/extract-skills/", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const extractData = await extractRes.json();
+      if (extractRes.ok) {
+        msg.textContent = "Skills extracted successfully.";
+        msg.className = "mt-3 text-success";
+        await loadSkills();
+      } else {
+        msg.textContent = extractData.error || "Extraction failed";
+        msg.className = "mt-3 text-danger";
+      }
+    } catch (err) {
+      msg.textContent = "An error occurred.";
+      msg.className = "mt-3 text-danger";
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", loadSkills);
+</script>
+{% endblock %}

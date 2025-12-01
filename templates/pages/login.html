@@ -1,0 +1,73 @@
+{% extends "base.html" %} {% block title %}Login | Job Recommendation AI{%
+endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="card-title mb-3 text-center">Login</h3>
+        <form id="login-form">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div
+          id="login-error"
+          class="mt-3 text-danger"
+          style="display: none"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document
+    .getElementById("login-form")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const errorDiv = document.getElementById("login-error");
+      errorDiv.style.display = "none";
+
+      try {
+        const res = await fetch("/api/login/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          errorDiv.textContent = data.message || "Login failed";
+          errorDiv.style.display = "block";
+          return;
+        }
+
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        window.location.href = "/";
+      } catch (err) {
+        errorDiv.textContent = "An error occurred. Please try again.";
+        errorDiv.style.display = "block";
+      }
+    });
+</script>
+{% endblock %}

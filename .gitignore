@@ -1,0 +1,35 @@
+# Python
+_pycache_/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Django
+*.sqlite3
+db.sqlite3
+.env
+*.env
+*.secret
+local_settings.py
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDEs
+.idea/
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Migrations (optional – use only if you want to ignore them)
+# **/migrations/
+# !/migrations/_init_.py
