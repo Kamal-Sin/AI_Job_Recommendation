@@ -216,15 +216,36 @@ class CVAPI(APIView):
             return Response({'cv': None}, status=status.HTTP_200_OK)
 
     def post(self, request):
-        if hasattr(request.user, 'cv'):
-            return Response({'error': 'CV already exists. Use PUT to update.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Check if CV already exists
+        cv_exists = hasattr(request.user, 'cv')
 
-        serializer = CVSerializer(
-            data=request.data, context={'request': request})
+        if cv_exists:
+            # Update existing CV
+            cv = request.user.cv
+            serializer = CVSerializer(
+                cv, data=request.data, context={'request': request})
+            is_update = True
+        else:
+            # Create new CV
+            serializer = CVSerializer(
+                data=request.data, context={'request': request})
+            is_update = False
+
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'CV uploaded.', 'cv': serializer.data}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if is_update:
+                return Response({
+                    'message': 'CV updated successfully',
+                    'cv': serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'message': 'CV uploaded successfully',
+                    'cv': serializer.data
+                }, status=status.HTTP_201_CREATED)
+        return Response({
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
         try:
