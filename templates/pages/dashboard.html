@@ -1,6 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Dashboard | Job Recommendation AI{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}Dashboard | Job Recommendation AI{%
+endblock %} {% block content %}
 <div class="row">
   <div class="col-md-6">
     <div class="card mb-4 shadow-sm">
@@ -32,6 +31,11 @@
         <p id="skills-empty" class="text-muted">
           Skills extracted from your CV will appear here.
         </p>
+        <div class="mt-3">
+          <a href="{% url 'recommendations' %}" class="btn btn-primary">
+            View Job Recommendations →
+          </a>
+        </div>
       </div>
     </div>
   </div>
