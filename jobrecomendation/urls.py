@@ -34,6 +34,11 @@ urlpatterns = [
         name='login_page'
     ),
     path(
+        'register/',
+        TemplateView.as_view(template_name='pages/register.html'),
+        name='register_page'
+    ),
+    path(
         'recommendations/',
         TemplateView.as_view(template_name='pages/recommendations.html'),
         name='recommendations'

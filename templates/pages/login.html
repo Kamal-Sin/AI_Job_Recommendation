@@ -1,5 +1,6 @@
-{% extends "base.html" %} {% block title %}Login | Job Recommendation AI{%
-endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Login | Job Recommendation AI{% endblock %}
+{% block content %}
 <div class="row justify-content-center">
   <div class="col-md-6">
     <div class="card shadow-sm">
@@ -33,6 +34,9 @@ endblock %} {% block content %}
           class="mt-3 text-danger"
           style="display: none"
         ></div>
+        <p class="mt-3 text-center">
+          Don't have an account? <a href="{% url 'register_page' %}">Register</a>
+        </p>
       </div>
     </div>
   </div>
@@ -56,7 +60,11 @@ endblock %} {% block content %}
 
         const data = await res.json();
         if (!res.ok) {
-          errorDiv.textContent = data.message || "Login failed";
+          let errorMsg = data.message || "Login failed";
+          if (data.errors && data.errors.error) {
+            errorMsg = data.errors.error;
+          }
+          errorDiv.textContent = errorMsg;
           errorDiv.style.display = "block";
           return;
         }

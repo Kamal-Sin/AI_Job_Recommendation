@@ -5,10 +5,9 @@ from django.core.exceptions import ValidationError
 
 # Custom User model
 class Users(AbstractUser):
-    phone = PhoneNumberField(max_length=15, blank=True, null=True, unique=True)
+    phone = PhoneNumberField(max_length=15, blank=True, null=True)
     address = models.CharField(max_length=100)
-    otp = models.CharField(max_length=6, null=True, blank=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)  # Users are active by default - no OTP needed
 
     def __str__(self):
         return self.username
